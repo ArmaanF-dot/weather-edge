@@ -5,7 +5,7 @@ import sys, numpy as np, pandas as pd
 sys.path.insert(0, ".")
 from ingest.kalshi import settled_markets, candles
 series = sys.argv[1]
-ms = settled_markets(series); rows = []
+ms = settled_markets(series)[-int(sys.argv[2]) if len(sys.argv) > 2 else None:]; rows = []
 for m in ms:
     close = pd.Timestamp(m["close_time"]).timestamp()
     y = 1 if m.get("result") == "yes" else 0

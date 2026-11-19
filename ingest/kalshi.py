@@ -1,7 +1,12 @@
-import requests
+import requests, time
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
 def _get(path, **params):
-    r = requests.get(BASE + path, params=params, timeout=60); r.raise_for_status(); return r.json()
+    for attempt in range(8):
+        r = requests.get(BASE + path, params=params, timeout=60)
+        if r.status_code == 429:
+            time.sleep(2 ** attempt); continue
+        r.raise_for_status(); time.sleep(0.15); return r.json()
+    r.raise_for_status()
 def settled_markets(series: str, limit_pages: int = 50):
     out, cursor = [], None
     for _ in range(limit_pages):
