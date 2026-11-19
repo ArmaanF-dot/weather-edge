@@ -1,7 +1,7 @@
 import io, requests, pandas as pd
 BASE = "https://mesonet.agron.iastate.edu"
 def get_cli(station: str, year: int) -> pd.DataFrame:
-    r = requests.get(f"{BASE}/api/1/cli.json", params={"station": station, "year": year}, timeout=60)
+    r = requests.get(f"{BASE}/json/cli.py", params={"station": station, "year": year}, timeout=60)
     r.raise_for_status()
     df = pd.DataFrame(r.json()["results"])
     return df[["valid", "high", "low"]].assign(valid=lambda d: pd.to_datetime(d["valid"]).dt.date.astype(str))
