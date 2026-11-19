@@ -1,0 +1,16 @@
+# Phase 0: two stations, daily HIGH only. Verify station against Kalshi contract terms PDF before trusting (see DECISIONS.md D-003).
+stations:
+  chicago:
+    kalshi_series: KXHIGHCHI
+    icao: KMDW
+    iem_network: IL_ASOS
+    cli_site: KMDW        # CHIHIGH.pdf: "Chicago Midway, Illinois" (confirmed 2026-11-19)
+    lst_utc_offset_hours: -6   # local STANDARD time, no DST
+    verified_from_primary_source: true
+  nyc:
+    kalshi_series: KXHIGHNY
+    icao: KNYC
+    iem_network: NY_ASOS
+    cli_site: KNYC        # NHIGH.pdf: Central Park (confirmed 2026-11-19)
+    lst_utc_offset_hours: -5
+    verified_from_primary_source: true

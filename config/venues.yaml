@@ -1,0 +1,4 @@
+kalshi:
+  settlement: NWS Daily Climate Report (CLI), whole degF, local standard time, most recent CLI available at expiration; later revisions ignored
+polymarket:
+  settlement: Weather Underground, whole-degree truncation (research only; not tradable from UK)
