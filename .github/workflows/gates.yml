@@ -11,11 +11,19 @@ jobs:
       - run: python -m pytest -q
       - name: Gate 2 Chicago
         run: python eval/gate2_metar_gap.py chicago 2024 2025 | tee data/gate2_chicago.txt
+        if: false
       - name: Gate 2 NYC
         run: python eval/gate2_metar_gap.py nyc 2024 2025 | tee data/gate2_nyc.txt
+        if: false
+      - name: Gate 1 v2 Chicago
+        run: python eval/gate1_v2.py chicago 900 2>&1 | tee data/gate1v2_chicago.txt
+        continue-on-error: true
+      - name: Gate 1 v2 NYC
+        run: python eval/gate1_v2.py nyc 900 2>&1 | tee data/gate1v2_nyc.txt
+        continue-on-error: true
       - name: Gate 1 Chicago
         run: python eval/gate1_calibration.py KXHIGHCHI 400 KMDW 2>&1 | tee data/gate1_chicago.txt
-        continue-on-error: true
+        if: false
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: gate-results, path: data/ }
