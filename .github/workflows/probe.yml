@@ -1,0 +1,16 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in \
+           "https://mesonet.agron.iastate.edu/json/cli.py?station=KMDW&year=2024" \
+           "https://mesonet.agron.iastate.edu/api/1/cli.json?station=MDW&year=2024" \
+           "https://mesonet.agron.iastate.edu/api/1/cli.json?station=KMDW&year=2024" \
+           "https://mesonet.agron.iastate.edu/api/1/climodat/daily.json?station=ILC1100&year=2024" \
+           "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=MDW&data=tmpf&year1=2024&month1=1&day1=1&year2=2024&month2=1&day2=3&tz=UTC&format=onlycomma&report_type=3" \
+           "https://api.elections.kalshi.com/trade-api/v2/markets?series_ticker=KXHIGHCHI&status=settled&limit=2"; do
+            echo "=== $u"; curl -s -m 30 -w "\nHTTP %{http_code}\n" "$u" | head -c 500; echo
+          done
