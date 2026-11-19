@@ -1,0 +1,13 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          B=https://api.elections.kalshi.com/trade-api/v2
+          T=KXHIGHCHI-26NOV16-T56
+          echo "--- market"; curl -s "$B/markets/$T" | head -c 1500; echo
+          echo "--- candles series path"; curl -s -w "\nHTTP %{http_code}\n" "$B/series/KXHIGHCHI/markets/$T/candlesticks?start_ts=1794700000&end_ts=1794877200&period_interval=60" | head -c 800
+          echo "--- candles v2 path"; curl -s -w "\nHTTP %{http_code}\n" "$B/markets/$T/candlesticks?start_ts=1794700000&end_ts=1794877200&period_interval=60" | head -c 800
+          echo "--- cutoff"; curl -s "$B/historical/cutoff"; curl -s "$B/historical/cutoff_timestamps" | head -c 400
