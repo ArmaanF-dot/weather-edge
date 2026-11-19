@@ -15,21 +15,33 @@ ms.update({m["ticker"]: m for m in settled_markets(st["kalshi_series"])})
 ms = sorted(ms.values(), key=lambda m: m["close_time"])[-N:]
 print("markets:", len(ms), "from", ms[0]["close_time"][:10], "to", ms[-1]["close_time"][:10])
 # truth + forecasts
-cli = pd.concat([get_cli(st["cli_site"], y) for y in range(2023, 2027)]).dropna(subset=["high"]).set_index("valid")["high"]
+cli = pd.concat([get_cli(st["cli_site"], y) for y in range(2025, 2027)]).dropna(subset=["high"]).set_index("valid")["high"]
 today = pd.Timestamp.utcnow().strftime("%Y-%m-%d")
 def lst_daily_max(h):
     # h is indexed by UTC; LST = UTC + off hours (off=-6). Day label = LST date. Require 20+ hourly values.
     l = h.copy(); l.index = l.index + pd.Timedelta(hours=off)
     g = l.groupby(l.index.date); mx = g.max(); cnt = g.count()
     mx = mx[cnt >= 20]; mx.index = pd.to_datetime(mx.index).strftime("%Y-%m-%d"); return mx
+import time
 def raw_utc(model):
     parts = []
-    for y in range(2023, 2027):
-        r = requests.get("https://previous-runs-api.open-meteo.com/v1/forecast", params=dict(latitude=st["lat"], longitude=st["lon"],
-            start_date=f"{y}-01-01", end_date=min(f"{y}-12-31", today), hourly="temperature_2m_previous_day1", temperature_unit="fahrenheit",
-            models=model, timezone="GMT"), timeout=180)
-        r.raise_for_status(); h = r.json()["hourly"]
+    for start, end in [(f"{y}-{m:02d}-01", (pd.Timestamp(f"{y}-{m:02d}-01") + pd.offsets.QuarterEnd(0)).strftime("%Y-%m-%d"))
+                       for y in (2025, 2026) for m in (1, 4, 7, 10)]:
+        if start > today: break
+        end = min(end, today)
+        for attempt in range(6):
+            try:
+                r = requests.get("https://previous-runs-api.open-meteo.com/v1/forecast", params=dict(latitude=st["lat"], longitude=st["lon"],
+                    start_date=start, end_date=end, hourly="temperature_2m_previous_day1", temperature_unit="fahrenheit",
+                    models=model, timezone="GMT"), timeout=60)
+                if r.status_code == 429: time.sleep(20 * (attempt + 1)); continue
+                r.raise_for_status(); break
+            except requests.RequestException as e:
+                print("retry", model, start, type(e).__name__); time.sleep(10 * (attempt + 1))
+        else: raise RuntimeError(f"open-meteo failed {model} {start}")
+        h = r.json()["hourly"]
         parts.append(pd.Series(h["temperature_2m_previous_day1"], index=pd.to_datetime(h["time"]), dtype=float))
+        time.sleep(1)
     return pd.concat(parts).dropna()
 f = pd.DataFrame({"e": lst_daily_max(raw_utc("ecmwf_ifs025")), "g": lst_daily_max(raw_utc("gfs_seamless"))})
 f["fc"] = f[["e", "g"]].mean(axis=1)
@@ -38,7 +50,7 @@ tr = pd.DataFrame({"cli": cli}).join(f["fc"], how="inner").dropna(); tr.index = 
 print("training days available:", len(tr))
 def fit(date):
     h = tr[(tr.index < date) & (tr.index >= date - pd.Timedelta(days=400))]
-    if len(h) < 120: return None
+    if len(h) < 90: return None
     b, a = np.polyfit(h.fc, h.cli, 1); res = h.cli - (a + b * h.fc)
     return a, b, max(res.std(), 1.0)
 def prob(m, mu, sd):
