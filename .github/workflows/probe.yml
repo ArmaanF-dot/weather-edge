@@ -1,0 +1,12 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for m in gfs_seamless ecmwf_ifs025; do
+            echo "--- $m"; curl -s -w "\nHTTP %{http_code}\n" "https://previous-runs-api.open-meteo.com/v1/forecast?latitude=41.786&longitude=-87.752&start_date=2023-01-01&end_date=2023-01-02&hourly=temperature_2m,temperature_2m_previous_day1,temperature_2m_previous_day2&temperature_unit=fahrenheit&models=$m&timezone=GMT" | head -c 500
+            echo; curl -s "https://previous-runs-api.open-meteo.com/v1/forecast?latitude=41.786&longitude=-87.752&start_date=2024-06-01&end_date=2024-06-01&hourly=temperature_2m_previous_day1&temperature_unit=fahrenheit&models=$m&timezone=GMT" | head -c 300
+            echo; curl -s "https://previous-runs-api.open-meteo.com/v1/forecast?latitude=41.786&longitude=-87.752&start_date=2025-01-01&end_date=2025-01-01&hourly=temperature_2m_previous_day1&temperature_unit=fahrenheit&models=$m&timezone=GMT" | head -c 300; echo
+          done
