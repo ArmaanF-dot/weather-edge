@@ -11,11 +11,11 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
       - name: Gate 3 Chicago
-        run: python -W ignore eval/gate3_model_vs_market.py chicago 2400 2>&1 | tee data/gate3_chicago.txt
+        run: python -W ignore eval/gate3_v2.py chicago 700 2>&1 | tee data/gate3v2_chicago.txt
         continue-on-error: true
       - name: Gate 3 NYC
-        run: python -W ignore eval/gate3_model_vs_market.py nyc 2400 2>&1 | tee data/gate3_nyc.txt
+        run: python -W ignore eval/gate3_v2.py nyc 700 2>&1 | tee data/gate3v2_nyc.txt
         continue-on-error: true
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: gate3-results, path: data/ }
+        with: { name: gate3v2-results, path: data/ }
