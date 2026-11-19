@@ -1,0 +1,12 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          B=https://api.elections.kalshi.com/trade-api/v2
+          echo "--- hist markets"; curl -s -w "\nHTTP %{http_code}\n" "$B/historical/markets?series_ticker=KXHIGHCHI&limit=2" | head -c 1200; echo
+          echo "--- hist markets cursor/oldest"; curl -s "$B/historical/markets?limit=1000" | python3 -c "import sys,json; j=json.load(sys.stdin); m=j.get('markets',[]); print(len(m), m[0]['ticker'] if m else None, bool(j.get('cursor')))"
+          echo "--- openmeteo hist forecast"; curl -s -w "\nHTTP %{http_code}\n" "https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=41.786&longitude=-87.752&start_date=2025-06-01&end_date=2025-06-03&daily=temperature_2m_max&temperature_unit=fahrenheit&models=ecmwf_ifs025,gfs_seamless,best_match&timezone=America%2FChicago" | head -c 700
+          echo "--- previous runs"; curl -s -w "\nHTTP %{http_code}\n" "https://previous-runs-api.open-meteo.com/v1/forecast?latitude=41.786&longitude=-87.752&start_date=2025-06-01&end_date=2025-06-03&daily=temperature_2m_max,temperature_2m_max_previous_day1&temperature_unit=fahrenheit&models=gfs_seamless&timezone=America%2FChicago" | head -c 700
