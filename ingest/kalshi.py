@@ -17,3 +17,17 @@ def settled_markets(series: str, limit_pages: int = 50):
 def candles(series: str, ticker: str, start_ts: int, end_ts: int, period_interval: int = 60):
     j = _get(f"/series/{series}/markets/{ticker}/candlesticks", start_ts=start_ts, end_ts=end_ts, period_interval=period_interval)
     return j.get("candlesticks", [])
+
+def historical_markets(series: str, max_pages: int = 60):
+    out, cursor = [], None
+    for _ in range(max_pages):
+        j = _get("/historical/markets", series_ticker=series, limit=1000, **({"cursor": cursor} if cursor else {}))
+        out += j.get("markets", []); cursor = j.get("cursor")
+        if not cursor or not j.get("markets"): break
+    return out
+def candles_any(series: str, ticker: str, start_ts: int, end_ts: int, period_interval: int = 60):
+    try:
+        return candles(series, ticker, start_ts, end_ts, period_interval)
+    except requests.HTTPError:
+        j = _get(f"/historical/markets/{ticker}/candlesticks", start_ts=start_ts, end_ts=end_ts, period_interval=period_interval)
+        return j.get("candlesticks", [])

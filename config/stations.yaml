@@ -3,6 +3,9 @@ stations:
   chicago:
     kalshi_series: KXHIGHCHI
     icao: KMDW
+    lat: 41.786
+    lon: -87.752
+    tz: America/Chicago
     iem_network: IL_ASOS
     cli_site: KMDW        # CHIHIGH.pdf: "Chicago Midway, Illinois" (confirmed 2026-11-19)
     lst_utc_offset_hours: -6   # local STANDARD time, no DST
@@ -10,6 +13,9 @@ stations:
   nyc:
     kalshi_series: KXHIGHNY
     icao: KNYC
+    lat: 40.779
+    lon: -73.969
+    tz: America/New_York
     iem_network: NY_ASOS
     cli_site: KNYC        # NHIGH.pdf: Central Park (confirmed 2026-11-19)
     lst_utc_offset_hours: -5
