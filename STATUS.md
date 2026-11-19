@@ -19,3 +19,9 @@ Chicago (69 days) / NYC (68 days). Brier market vs climatology; skill = 1 - mkt/
 - D 15:00: Chi 0.018 (0.91) | NYC 0.035 (0.81)
 Calibration looks good in the middle; cheap tails (<15%) slightly overpriced (Chi D 00:00: 9% implied vs 4% realised, n=71) - small sample.
 Limits: only ~68 days (API default window; older data needs /historical endpoints); baseline is climatology only, so this shows the market is far better than naive, NOT whether a NWS/NBM/ECMWF-based model beats it. Next test: add NWS/NBM or ECMWF forecast baseline.
+
+## Gate 3 (2026-11-19): EMOS(ECMWF+GFS) vs market at D 00:00 LST, ~68 days/station — NOT TRUSTWORTHY YET
+- Chicago: Brier model 0.0775 vs market 0.0957; paper P&L +$0.19-0.30/contract after fees. NYC: model 0.0915 vs market 0.0817; P&L ~ +$0.02-0.06 (within noise).
+- Chicago result is likely inflated: Open-Meteo "historical forecast" stitches short-lead hours from the latest runs (near-analysis), so it can leak same-day information. Must redo with true fixed-lead forecasts (Previous Runs API, hourly temperature_2m_previous_day1 -> LST-day max) before believing any edge.
+- Price history: candles only exist for ~69 days; older (historical) markets returned no candles (1,986 of 2,400 markets had no price data). Real fix = start a daily snapshot collector now so a clean out-of-sample record accrues.
+- Sample is tiny and brackets within a day are correlated (effective n ~ 69), so reported standard errors are understated.
