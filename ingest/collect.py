@@ -8,6 +8,7 @@ now = dt.datetime.now(dt.timezone.utc); ts = now.strftime("%Y-%m-%dT%H:%MZ")
 cfg = yaml.safe_load(open("config/stations.yaml"))["stations"]
 mk_rows, ob_rows, fc_rows = [], [], []
 for name, st in cfg.items():
+    time.sleep(3)
     try:
         cur = None
         while True:
@@ -21,7 +22,11 @@ for name, st in cfg.items():
     except Exception as e: print("kalshi fail", name, e)
     try:
         d0 = (now - dt.timedelta(days=1)).strftime("%Y-%m-%d"); d1 = (now + dt.timedelta(days=1)).strftime("%Y-%m-%d")
-        a = get_asos(st["icao"][1:], st["iem_network"], d0, d1).tail(12)
+        for _try in range(4):
+            try: a = get_asos(st["icao"][1:], st["iem_network"], d0, d1).tail(12); break
+            except requests.HTTPError as e:
+                if e.response.status_code != 429 or _try == 3: raise
+                time.sleep(10 * (_try + 1))
         for r in a.itertuples(): ob_rows.append(dict(ts=ts, station=name, obs_time=str(r.valid), tmpf=r.tmpf))
     except Exception as e: print("obs fail", name, e)
     try:
