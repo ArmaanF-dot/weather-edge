@@ -25,3 +25,11 @@ Limits: only ~68 days (API default window; older data needs /historical endpoint
 - Chicago result is likely inflated: Open-Meteo "historical forecast" stitches short-lead hours from the latest runs (near-analysis), so it can leak same-day information. Must redo with true fixed-lead forecasts (Previous Runs API, hourly temperature_2m_previous_day1 -> LST-day max) before believing any edge.
 - Price history: candles only exist for ~69 days; older (historical) markets returned no candles (1,986 of 2,400 markets had no price data). Real fix = start a daily snapshot collector now so a clean out-of-sample record accrues.
 - Sample is tiny and brackets within a day are correlated (effective n ~ 69), so reported standard errors are understated.
+
+## Gate 3 v2 (2026-11-20): leak-free day-1 forecasts (Open-Meteo Previous Runs, ECMWF+GFS mean, EMOS walk-forward)
+At D 00:00 LST, ~69 days/station, model-only MAE vs CLI 2.4-2.5F:
+- Chicago: Brier market 0.0957, model 0.1266, blend 0.1050. Paper P&L at edge>0.05..0.20: -$0.05 to -$0.07 per contract (after fees).
+- NYC: Brier market 0.0817, model 0.1198, blend 0.0949. Paper P&L: -$0.09 to -$0.15 per contract.
+- The earlier Gate 3 "Chicago edge" was forecast leakage; it disappears with fixed-lead forecasts. Model is over-dispersed on tails (5-15% bucket: model ~18-20% vs realised 1-5%).
+- Verdict so far: a simple two-model day-ahead EMOS does NOT beat Kalshi at midnight. Market skill vs climatology is already 50%+ the day before and 80-90% by 15:00.
+- Untested: NBM/NWS point forecasts, ensemble spread, ML residuals, intraday nowcast vs market at 09-12 LST, longer history (only ~69 priced days exist).
