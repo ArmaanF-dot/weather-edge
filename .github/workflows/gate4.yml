@@ -1,0 +1,21 @@
+name: gate4
+on: workflow_dispatch
+jobs:
+  gate3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q
+      - name: Gate 4 Chicago
+        run: python -W ignore eval/gate4_nowcast.py chicago 700 2>&1 | tee data/gate4_chicago.txt
+        continue-on-error: true
+      - name: Gate 4 NYC
+        run: python -W ignore eval/gate4_nowcast.py nyc 700 2>&1 | tee data/gate4_nyc.txt
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: gate4-results, path: data/ }
