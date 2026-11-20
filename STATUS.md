@@ -33,3 +33,14 @@ At D 00:00 LST, ~69 days/station, model-only MAE vs CLI 2.4-2.5F:
 - The earlier Gate 3 "Chicago edge" was forecast leakage; it disappears with fixed-lead forecasts. Model is over-dispersed on tails (5-15% bucket: model ~18-20% vs realised 1-5%).
 - Verdict so far: a simple two-model day-ahead EMOS does NOT beat Kalshi at midnight. Market skill vs climatology is already 50%+ the day before and 80-90% by 15:00.
 - Untested: NBM/NWS point forecasts, ensemble spread, ML residuals, intraday nowcast vs market at 09-12 LST, longer history (only ~69 priced days exist).
+
+## Gate 4 (2026-11-20): intraday nowcast (obs-so-far + day-1 forecast, truncated-normal) vs market
+Brier market vs model at 09/12/15 LST, ~69 days/station: Chicago 0.092/0.121, 0.061/0.097, 0.018/0.059; NYC 0.079/0.110, 0.061/0.095, 0.035/0.066.
+Paper P&L (taker, after fees) is negative at nearly every threshold (about -$0.01 to -$0.07 per contract); the few positives are within noise.
+Verdict: a simple nowcast built on hourly METAR does not beat Kalshi intraday. Hourly obs are too coarse (Gate 2); the market is already sharp by midday.
+
+## Collector
+.github/workflows/collect.yml runs hourly (read-only public data) and appends Kalshi quotes, METAR obs and ECMWF/GFS forecasts to the `data` branch (snapshots/*.csv). Purpose: build a clean out-of-sample record. Re-evaluate after ~60-90 days.
+
+## Recommendation
+Stop the 20-week build. Keep the collector running (free). Revisit only if a materially different input appears (5-min ASOS, NBM/ensemble spread) or after 90 days of collected data.
