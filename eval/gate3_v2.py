@@ -25,16 +25,17 @@ def lst_daily_max(h):
 import time
 def raw_utc(model):
     parts = []
-    for start, end in [(f"{y}-{m:02d}-01", (pd.Timestamp(f"{y}-{m:02d}-01") + pd.offsets.QuarterEnd(0)).strftime("%Y-%m-%d"))
-                       for y in (2025, 2026) for m in (1, 4, 7, 10)]:
+    for start, end in [(f"{y}-{m:02d}-01", (pd.Timestamp(f"{y}-{m:02d}-01") + pd.offsets.DateOffset(months=6, days=-1)).strftime("%Y-%m-%d"))
+                       for y in (2025, 2026) for m in (1, 7)]:
         if start > today: break
         end = min(end, today)
-        for attempt in range(6):
+        for attempt in range(7):
             try:
                 r = requests.get("https://previous-runs-api.open-meteo.com/v1/forecast", params=dict(latitude=st["lat"], longitude=st["lon"],
                     start_date=start, end_date=end, hourly="temperature_2m_previous_day1", temperature_unit="fahrenheit",
                     models=model, timezone="GMT"), timeout=60)
-                if r.status_code == 429: time.sleep(20 * (attempt + 1)); continue
+                if r.status_code == 429:
+                    print('429', model, start, r.text[:120]); time.sleep(45 * (attempt + 1)); continue
                 r.raise_for_status(); break
             except requests.RequestException as e:
                 print("retry", model, start, type(e).__name__); time.sleep(10 * (attempt + 1))
